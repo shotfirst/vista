@@ -136,10 +136,15 @@ th{font-weight:700;color:var(--muted);border-top:0}
 .rowbtns{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);flex-wrap:wrap}
 .learn{font-weight:700;font-size:1rem}
 .art .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.credit{padding:5px var(--s4);font-size:.73rem;color:var(--muted);line-height:1.35}
+.credit a{color:inherit}
 .art .count{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.8rem;font-weight:700;padding:5px 10px;border-radius:999px}
 .photo-next{position:absolute;right:10px;bottom:10px;border:0;border-radius:999px;background:rgba(0,0,0,.7);color:#fff;padding:8px 12px;font-weight:800;font-size:.82rem;cursor:pointer}
-.strip{display:flex;gap:6px;overflow-x:auto;padding:8px var(--s4) 0;scrollbar-width:none}
-.strip img{height:64px;width:86px;object-fit:cover;border-radius:8px;flex:0 0 auto}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:8px var(--s4) 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.strip button{border:2px solid transparent;background:none;padding:0;border-radius:8px;flex:0 0 auto;cursor:pointer}
+.strip button[aria-pressed="true"]{border-color:var(--brand)}
+.strip img{display:block;height:64px;width:86px;object-fit:cover;border-radius:6px}
+.photobtn{border:2px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:44px;display:inline-flex;align-items:center}
 .share{display:block;width:100%;margin:var(--s3) 0 0;border:0;border-radius:var(--r);background:var(--brand);color:var(--brand-ink);font-weight:800;font-size:1.1rem;padding:16px;min-height:56px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -348,7 +353,7 @@ th{font-weight:700;color:var(--muted);border-top:0}
   // ---------- shared votes (server) ----------
   var syncEl = document.getElementById("sync");
   function setSync(t){ syncEl.textContent = t; }
-  var shared = false, photos = {};
+  var shared = false, photos = {}, alternateCredits = {};
   function pullVotes(){
     return fetch("/api/votes",{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(all){
       Object.keys(all).forEach(function(p){ if(!(p===state.me && writing[p])) votes[p]=all[p]||{}; });
@@ -359,6 +364,9 @@ th{font-weight:700;color:var(--muted);border-top:0}
   function pullPhotos(){
     return fetch("/api/photos",{cache:"no-store"}).then(function(r){ return r.json(); }).then(function(p){ photos=p||{}; render(); }).catch(function(){});
   }
+  fetch("/place-photos/alternates.json").then(function(r){ if(!r.ok) throw Error("photo credits unavailable"); return r.json(); })
+    .then(function(all){ alternateCredits=all; render(); })
+    .catch(function(e){ console.error(e); });
   setSync("Connecting to the shared list…");
   pullVotes(); pullPhotos();
   setInterval(pullVotes, 10000); setInterval(pullPhotos, 30000);
@@ -369,6 +377,26 @@ th{font-weight:700;color:var(--muted);border-top:0}
       .then(function(r){ if(!r.ok) throw 0; shared=true; setSync("Picks are shared. Everyone who opens this link sees the same hearts."); })
       .catch(function(){ shared=false; setSync("Couldn't save to the shared list. Picks stay on this phone until it's back."); })
       .then(function(){ writing[person]=false; });
+  }
+  function shrink(file){
+    return new Promise(function(res, rej){
+      var img = new Image(); var url = URL.createObjectURL(file);
+      img.onload = function(){
+        var w = img.width, h = img.height, max = 1200; var sc = Math.min(1, max/Math.max(w,h));
+        var c = document.createElement("canvas"); c.width = Math.round(w*sc); c.height = Math.round(h*sc);
+        c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+        res(c.toDataURL("image/jpeg",0.82));
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); rej(Error("photo could not be opened")); }; img.src = url;
+    });
+  }
+  function addPhoto(id, file, btn){
+    var input = btn.querySelector("input");
+    btn.querySelector("span").textContent = "Uploading…"; input.disabled = true;
+    shrink(file).then(function(dataUrl){
+      return fetch("/api/photos/"+id,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dataUrl:dataUrl})});
+    }).then(function(r){ if(!r.ok) throw 0; photoChoice[id]=0; return pullPhotos(); })
+      .catch(function(){ btn.querySelector("span").textContent = "Upload failed, try again"; input.disabled = false; input.value = ""; });
   }
   function vote(id, v){
     
@@ -477,25 +505,35 @@ th{font-weight:700;color:var(--muted);border-top:0}
       var choices = ph.slice().reverse();
       if(defaultPhoto) {
         choices.push("/place-photos/"+p[0]+".jpg");
-        choices.push("/place-photos/"+p[0]+"-2.jpg");
+        if(alternateCredits[p[0]]) choices.push("/place-photos/"+p[0]+"-2.jpg");
       }
       var choice = photoChoice[p[0]] || 0;
       if(choice >= choices.length) choice = 0;
       photoChoice[p[0]] = choice;
       var artHtml = choices.length ? '<img class="photo" src="'+choices[choice]+'" alt="'+p[1]+'">' :
         art(p[4], i)+'<span class="glyph">'+p[3]+'</span>';
+      var selectedCredit = choice===ph.length ? defaultPhoto : choice===ph.length+1 ? alternateCredits[p[0]] : null;
+      var credit = selectedCredit ? '<div class="credit"><a href="'+selectedCredit.source+'" target="_blank" rel="noopener">'+
+        (defaultPhoto.general?'General photo: ':'Photo: ')+selectedCredit.author+', '+selectedCredit.license+'</a></div>' : '';
       var nextPhoto = choices.length>1 ? '<button class="photo-next" type="button">Next photo</button>' : '';
-      c.innerHTML = '<div class="art">'+artHtml+onlyLong+nextPhoto+(choices.length>1?'<span class="count">'+(choice+1)+' of '+choices.length+'</span>':'')+'</div>'+
+      var strip = choices.length>1 ? '<div class="strip" aria-label="Photos for '+p[1]+'">'+choices.map(function(u, n){
+        return '<button class="thumb" type="button" aria-label="Show photo '+(n+1)+'" aria-pressed="'+(n===choice)+'"><img src="'+u+'" alt=""></button>';
+      }).join("")+'</div>' : '';
+      c.innerHTML = '<div class="art">'+artHtml+onlyLong+nextPhoto+(choices.length>1?'<span class="count">'+(choice+1)+' of '+choices.length+'</span>':'')+'</div>'+credit+strip+
         '<div class="body"><h3>'+p[1]+'</h3>'+
         '<div class="facts"><span>🚗 <b>'+p[6]+'</b></span><span>🚶 <b>'+p[7]+'</b></span><span>👨‍👩‍👧‍👦 <b>'+p[8]+'</b></span></div>'+
         '<div class="cost">'+(p[10]===0?"Free":money(p[9])+" to "+money(p[10]))+'<span class="pill'+(p[15]==="Sourced"?" src":"")+'">'+p[15]+'</span></div>'+
         '<p class="desc">'+p[11]+'</p><p class="more">'+p[12]+'</p>'+
-        '<div class="rowbtns"><button class="morebtn" type="button">More detail</button><a class="learn" href="'+LINKS[p[0]]+'" target="_blank" rel="noopener">Learn more ↗</a></div>'+
+        '<div class="rowbtns"><button class="morebtn" type="button">More detail</button><a class="learn" href="'+LINKS[p[0]]+'" target="_blank" rel="noopener">Learn more ↗</a><label class="photobtn"><span>Add a photo</span><input type="file" accept="image/*" hidden></label></div>'+
         '<div class="votes"><div class="vbtns"><button class="like" type="button" aria-label="Like" aria-pressed="'+(my==="like")+'">♥</button><button class="skip" type="button" aria-label="Skip" aria-pressed="'+(my==="skip")+'">✕</button></div><div class="faces">'+faces+'</div></div></div>';
       c.querySelector(".morebtn").addEventListener("click", function(){ c.classList.toggle("open"); this.textContent = c.classList.contains("open")?"Less":"More detail"; });
+      c.querySelector(".photobtn input").addEventListener("change", function(e){ if(e.target.files[0]) addPhoto(p[0], e.target.files[0], c.querySelector(".photobtn")); });
       if(choices.length>1) c.querySelector(".photo-next").addEventListener("click", function(){
         photoChoice[p[0]] = (photoChoice[p[0]] + 1) % choices.length;
         render();
+      });
+      Array.prototype.forEach.call(c.querySelectorAll(".thumb"), function(button, n){
+        button.addEventListener("click", function(){ photoChoice[p[0]]=n; render(); });
       });
       c.querySelector(".like").addEventListener("click", function(){ vote(p[0],"like"); });
       c.querySelector(".skip").addEventListener("click", function(){ vote(p[0],"skip"); });
