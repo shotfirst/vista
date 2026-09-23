@@ -475,7 +475,10 @@ th{font-weight:700;color:var(--muted);border-top:0}
       var ph = photos[p[0]]||[];
       var defaultPhoto = window.PLACE_PHOTOS && window.PLACE_PHOTOS[p[0]];
       var choices = ph.slice().reverse();
-      if(defaultPhoto) choices.push("/place-photos/"+p[0]+".jpg");
+      if(defaultPhoto) {
+        choices.push("/place-photos/"+p[0]+".jpg");
+        choices.push("/place-photos/"+p[0]+"-2.jpg");
+      }
       var choice = photoChoice[p[0]] || 0;
       if(choice >= choices.length) choice = 0;
       photoChoice[p[0]] = choice;
