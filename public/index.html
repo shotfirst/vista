@@ -101,6 +101,24 @@ section{margin-top:var(--s7)}
 .pill{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--muted);margin-left:6px;vertical-align:3px}
 .pill.src{color:var(--leaf)}
 
+/* dated price reads */
+.price-group{margin-top:var(--s5)}
+.price-group h3{margin-bottom:var(--s2)}
+.price-grid{display:grid;gap:var(--s3)}
+@media (min-width:640px){.price-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.price-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);min-width:0}
+.price-item h4{font-family:var(--display);font-size:1.08rem;line-height:1.25;margin:0 0 6px}
+.price-amount{font-family:var(--display);font-size:1.35rem;font-weight:800;color:var(--brand);line-height:1.25;margin:0 0 8px}
+.price-source,.price-time,.price-earlier,.price-detail{font-size:.9rem;line-height:1.4;margin:5px 0}
+.price-source{font-weight:700}
+.price-time,.price-earlier{color:var(--muted)}
+.price-earlier{border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
+.price-status{display:inline-block;background:var(--chip);color:var(--ink);border-radius:999px;padding:3px 9px;font-size:.78rem;font-weight:700}
+.price-detail{margin-top:9px}
+.past-notes{margin-top:var(--s5);border-top:1px solid var(--line);padding-top:var(--s3)}
+.past-notes summary{font-weight:700;cursor:pointer}
+.past-notes .notes{margin-top:var(--s3)}
+
 /* itinerary */
 .days{list-style:none;margin:0;padding:0;border-left:4px solid var(--line)}
 .days li{position:relative;padding:0 0 var(--s4) var(--s4)}
@@ -171,11 +189,18 @@ th{font-weight:700;color:var(--muted);border-top:0}
   <section id="cost">
     <h2>What it adds up to</h2>
     <div class="panel" aria-live="polite">
-      <div class="total"><span id="tname" style="font-weight:700"></span><span>Plan on about <b id="tmid"></b></span></div>
+      <div class="total"><span id="tname" style="font-weight:700"></span><span>Earlier estimate: <b id="tmid"></b></span></div>
       <p class="small" id="tsub"></p>
+      <p class="small">Earlier planning estimate. The dated price reads below are the better booking reference; room counts, taxes and some fees are not confirmed, so they cannot form a reliable new trip total yet.</p>
       <div class="stack" id="stack" aria-hidden="true"></div>
       <ul class="rows" id="rows"></ul>
     </div>
+  </section>
+
+  <section id="prices">
+    <h2>Price reads for your dates</h2>
+    <p class="lede">Prices read on 23 September 2026 for the dates and party shown. These are dated booking snapshots, not an automatically updating feed. Only the Air Canada fare was confirmed by two sources. The earlier estimates remain below each quote.</p>
+    <div id="priceReads"><p class="small">Price reads could not load.</p></div>
   </section>
 
   <section id="days">
@@ -193,7 +218,22 @@ th{font-weight:700;color:var(--muted);border-top:0}
 
   <section>
     <h2>What the refute pass changed</h2>
-    <p class="lede">After the first research pass I tried to break each number. These are the ones that moved, and the ones I still can't prove.</p>
+    <ul class="notes">
+      <li>Flights are confirmed by two sources, and the Air Canada total covers all six travellers.</li>
+      <li>Hotel totals are one source, not confirmed: the two-room Las Vegas and Tusayan totals may be for one room.</li>
+      <li>The minivan is a quoted range with the child seat extra. The roughly 30 percent reduction is David's own estimate, not a quote.</li>
+      <li>Grand Canyon West's kids-free deal is available only when bought in person.</li>
+      <li>Taxes and resort fees are not confirmed for hotels, the minivan and attractions.</li>
+    </ul>
+    <h3>Still to check</h3>
+    <ul class="notes">
+      <li>The Tuesday 8 December return option.</li>
+      <li>The rodeo dates, 3 to 12 December.</li>
+      <li>Taxes and resort fees.</li>
+      <li>Air Canada Basic Economy carry-on rules.</li>
+    </ul>
+    <details class="past-notes"><summary>Earlier refute notes</summary>
+    <p class="small">These earlier research notes are kept for reference. The dated price reads above take priority where amounts differ.</p>
     <ul class="notes">
       <li><strong>The rodeo fills the city.</strong> The National Finals Rodeo runs 3 to 12 December at the Thomas and Mack Center, your whole window. On its first weekend, rooms average close to US$400 a night. Midweek and the second weekend run lower. I priced stays at rodeo rates, and the long trip leaves town on the busiest weekday nights.</li>
       <li><strong>The South Rim now costs Canadians extra.</strong> Since 1 January 2026, visitors from outside the US aged 16 and up pay US$100 each on top of the US$35 car fee. For the four adults that is US$435, or US$285 with the US$250 non resident pass, which covers four adults. Kai and Keo enter free. Zion has the same rule. Grand Canyon West, Hoover Dam, Red Rock and Valley of Fire do not.</li>
@@ -202,10 +242,12 @@ th{font-weight:700;color:var(--muted);border-top:0}
       <li><strong>December at the South Rim is real winter.</strong> Highs around 7°C, nights well below freezing, a few inches of snow most weeks. The Rim Trail is paved and flat, so Stephanie and Fei will be fine with warm layers. Hermit Road closes to cars from 1 December, which means less driving and more shuttle.</li>
       <li><strong>Still unproven.</strong> Rodeo week hotel rates for your exact nights, Kai's Vegas entry fee (Louisville was US$40, I assumed the same), the Polar Express dates in Williams, Discovery Children's Museum pricing, and every food figure. Each line below says sourced or estimate.</li>
     </ul>
+    </details>
   </section>
 
   <section>
     <h2>Where each number comes from</h2>
+    <p class="small">Earlier research sources are retained below. The dated price reads above identify the newer source for each quote.</p>
     <div class="wide">
       <table>
         <thead><tr><th>Number</th><th>What I found</th><th>Source</th></tr></thead>
@@ -224,13 +266,14 @@ th{font-weight:700;color:var(--muted);border-top:0}
         </tbody>
       </table>
     </div>
-    <p class="foot">Researched 23 September 2026. Version 1.3. "Sourced" means I found a published price. "Estimate" means I built the number from typical costs, so treat it as softer.</p>
+    <p class="foot">Researched 23 September 2026. Version 1.4. "Sourced" means I found a published price. "Estimate" means I built the number from typical costs, so treat it as softer.</p>
   </section>
 </main>
 
-<div class="bar"><span><span class="small">Your trip</span><br><b id="barTotal"></b></span><a href="#cost">See the breakdown</a></div>
+<div class="bar"><span><span class="small">Earlier trip estimate</span><br><b id="barTotal"></b></span><a href="#cost">See the breakdown</a></div>
 
 <script src="/place-photos/credits.js"></script>
+<script src="/price-reads.js"></script>
 <script>
 (function(){
   var FX = 1.39;
@@ -284,7 +327,7 @@ th{font-weight:700;color:var(--muted);border-top:0}
       "Both free. Go in the evening after dinner. Stephanie and Fei can settle at the tables afterward while you walk the kids.","d3","d3","Sourced"],
     ["shark","Shark Reef Aquarium at Mandalay Bay","kids","🦈","water",0,"On the Strip","Easy","Keo and Kai",120,150,
       "A walk through tunnel with sharks overhead and a touch pool for Keo.",
-      "US$29 adults, US$27 for Stephanie and Fei, US$24 for Kai, Keo free. Book a timed slot online. An hour, then lunch at Mandalay Bay.","d9","d6","Sourced"],
+      "Timed entry: $29 USD per adult, $24 USD for Kai, Keo free, or $140 USD for the family. Anytime tickets: $36 USD per adult, $31 USD for Kai, or $175 USD for the family. Availability for 7 to 10 Dec has not been checked. An hour, then lunch at Mandalay Bay.","d9","d6","Sourced"],
     ["discovery","Discovery Children's Museum","kids","🧒","leaf",0,"Downtown","Easy","Keo, with Kai tolerating it",120,170,
       "Three floors of hands on play. This is Keo's best day in Vegas while Kai is at the tournament.",
       "About US$20 a person; grown ups pay too. Perfect for Stephanie, Fei and Keo on Saturday while you and Lauren are at the hall.","d4","d4","Estimate"],
@@ -528,10 +571,18 @@ th{font-weight:700;color:var(--muted);border-top:0}
       var strip = choices.length>1 ? '<div class="strip" aria-label="Photos for '+p[1]+'">'+choices.map(function(u, n){
         return '<button class="thumb" type="button" aria-label="Show photo '+(n+1)+'" aria-pressed="'+(n===choice)+'"><img src="'+u+'" alt=""></button>';
       }).join("")+'</div>' : '';
+      var quotedAttraction = window.VISTA_ATTRACTION_QUOTES && window.VISTA_ATTRACTION_QUOTES[p[0]];
+      var costHtml = quotedAttraction ?
+        '<div class="cost">'+quotedAttraction.amount+'<span class="pill src">'+p[15]+'</span></div>'+
+        '<p class="price-source">Source: '+quotedAttraction.source+'</p>'+
+        '<p class="price-time">Price read on '+quotedAttraction.read+'</p>'+
+        '<span class="price-status">'+quotedAttraction.status+'</span>'+
+        '<p class="price-earlier">earlier estimate: '+money(p[9])+' to '+money(p[10])+' for the family</p>' :
+        '<div class="cost">'+(p[10]===0?"Free":money(p[9])+" to "+money(p[10]))+'<span class="pill'+(p[15]==="Sourced"?" src":"")+'">'+p[15]+'</span></div>';
       c.innerHTML = '<div class="art">'+artHtml+onlyLong+nextPhoto+(choices.length>1?'<span class="count">'+(choice+1)+' of '+choices.length+'</span>':'')+'</div>'+credit+strip+
         '<div class="body"><h3>'+p[1]+'</h3>'+
         '<div class="facts"><span>🚗 <b>'+p[6]+'</b></span><span>🚶 <b>'+p[7]+'</b></span><span>👨‍👩‍👧‍👦 <b>'+p[8]+'</b></span></div>'+
-        '<div class="cost">'+(p[10]===0?"Free":money(p[9])+" to "+money(p[10]))+'<span class="pill'+(p[15]==="Sourced"?" src":"")+'">'+p[15]+'</span></div>'+
+        costHtml+
         '<p class="desc">'+p[11]+'</p><p class="more">'+p[12]+'</p>'+
         '<div class="rowbtns"><button class="morebtn" type="button">More detail</button><a class="learn" href="'+LINKS[p[0]]+'" target="_blank" rel="noopener">Learn more ↗</a><label class="photobtn"><span>Add a photo</span><input type="file" accept="image/*" hidden></label></div>'+
         '<div class="votes"><div class="vbtns"><button class="like" type="button" aria-label="Like" aria-pressed="'+(my==="like")+'">♥</button><button class="skip" type="button" aria-label="Skip" aria-pressed="'+(my==="skip")+'">✕</button></div><div class="faces">'+faces+'</div></div></div>';

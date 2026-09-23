@@ -2,6 +2,11 @@
 
 One page the whole family opens on a phone. Everyone taps hearts on places; every phone shows the same hearts. Anyone can add a photo to a place.
 
+## Version 1.4 (23 September 2026)
+- Added dated price reads for flights, Las Vegas and Tusayan stays, minivans and attractions, each with its source, Eastern read time, confidence label and earlier estimate.
+- Added the 1.4 "What the refute pass changed" findings and "Still to check" list; kept the earlier refute notes and research sources available for reference.
+- The switch-driven trip total remains an earlier planning estimate where room counts, taxes, fees or dates have not been confirmed.
+
 ## Version 1.3 (23 September 2026)
 - New page (version 1.2 content) wired to the shared server: six header photos, cost breakdown and day plan above the places, Learn more link on every card, travel insurance removed.
 - Name picker is David, Lauren and Stephanie. Coloured initials show on each card so everyone sees who liked what.
