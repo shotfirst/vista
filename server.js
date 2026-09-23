@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] })
 const DB = process.env.REPLIT_DB_URL || null;
 const VOTES_FILE = path.join(__dirname, "data", "votes.json");
 const PHOTO_DIR = path.join(__dirname, "data", "photos");
-const PEOPLE = ["David", "Lauren", "Kai", "Stephanie", "Fei"];
+const PEOPLE = ["David", "Lauren", "Stephanie"];
 
 async function dbGet(key) {
   const r = await fetch(DB + "/" + encodeURIComponent(key));
@@ -93,6 +93,6 @@ app.post("/api/photos/:place", async (req, res) => {
   } catch (e) { res.status(500).json({ error: "save failed" }); }
 });
 
-app.get("/api/health", (req, res) => res.json({ ok: true, storage: DB ? "replit-db" : "files", version: "1.1.0" }));
+app.get("/api/health", (req, res) => res.json({ ok: true, storage: DB ? "replit-db" : "files", version: "1.3.0" }));
 const port = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0", () => console.log("Vista listening on " + port + " using " + (DB ? "Replit DB" : "files")));
