@@ -1,5 +1,6 @@
 run = "npm install && npm start"
 entrypoint = "server.js"
+modules = ["web", "nodejs-18"]
 
 [deployment]
 run = ["sh", "-c", "npm install && npm start"]
@@ -8,3 +9,6 @@ deploymentTarget = "autoscale"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[nix]
+channel = "stable-25_05"
