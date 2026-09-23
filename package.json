@@ -1,0 +1,10 @@
+{
+  "name": "vista-family-trip-planner",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Las Vegas December 2026 family trip planner with shared votes and photos",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.19.2" },
+  "engines": { "node": ">=18" }
+}

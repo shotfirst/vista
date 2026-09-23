@@ -1,0 +1,10 @@
+run = "npm install && npm start"
+entrypoint = "server.js"
+
+[deployment]
+run = ["sh", "-c", "npm install && npm start"]
+deploymentTarget = "autoscale"
+
+[[ports]]
+localPort = 3000
+externalPort = 80

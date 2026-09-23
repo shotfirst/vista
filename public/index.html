@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Las Vegas, December 2026: the family trip planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --ink:#1B1A2E; --muted:#5B5A72; --bg:#FBF7F2; --surface:#FFFFFF; --line:#E4DCD2;
+  --brand:#C2410C; --brand-ink:#FFFFFF; --canyon:#B45309; --neon:#7C3AED; --water:#0E7490; --leaf:#15803D; --sun:#F59E0B;
+  --chip:#F3EDE4; --track:#EDE6DC; --like:#15803D; --skip:#9CA3AF;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"Instrument Sans","Helvetica Neue",system-ui,sans-serif;
+  --r:16px; --r-lg:24px;
+  --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:36px; --s7:56px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --ink:#F1ECE6; --muted:#B4ADA4; --bg:#141320; --surface:#1E1C2E; --line:#333048; --chip:#2A2740; --track:#2A2740; --brand:#FB923C; --brand-ink:#1B1A2E; --skip:#6B7280; }
+}
+:root[data-theme="dark"]{ --ink:#F1ECE6; --muted:#B4ADA4; --bg:#141320; --surface:#1E1C2E; --line:#333048; --chip:#2A2740; --track:#2A2740; --brand:#FB923C; --brand-ink:#1B1A2E; --skip:#6B7280; }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:19px;line-height:1.5;-webkit-text-size-adjust:100%}
+main{max-width:820px;margin:0 auto;padding:var(--s5) var(--s4) 120px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,8vw,3.4rem);line-height:1;letter-spacing:-.02em;margin:0 0 var(--s3)}
+h2{font-family:var(--display);font-weight:800;font-size:1.75rem;line-height:1.1;margin:0 0 var(--s3)}
+h3{font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 4px;line-height:1.15}
+p{margin:0 0 var(--s3)}
+a{color:var(--brand);text-underline-offset:3px}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,label:focus-within{outline:3px solid var(--sun);outline-offset:2px}
+.lede{color:var(--muted);max-width:60ch;margin-bottom:var(--s4)}
+section{margin-top:var(--s7)}
+.small{font-size:.95rem;color:var(--muted)}
+
+/* who are you */
+.who{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0 var(--s4)}
+.who button{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:12px 18px;font-weight:600;font-size:1.05rem;min-height:52px}
+.who button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.notice{background:var(--chip);border-radius:var(--r);padding:var(--s3) var(--s4);font-size:1rem;color:var(--muted)}
+
+/* segmented controls */
+.seg{display:grid;grid-template-columns:repeat(var(--n,2),1fr);background:var(--track);border-radius:var(--r);padding:5px;gap:5px;margin-bottom:var(--s3)}
+.seg button{border:0;border-radius:12px;background:transparent;color:var(--muted);padding:12px 8px;font-weight:700;line-height:1.15;min-height:60px}
+.seg button small{display:block;font-weight:500;font-size:.85rem}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+
+/* filter chips */
+.chips{display:flex;gap:var(--s2);overflow-x:auto;padding-bottom:6px;margin-bottom:var(--s3);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-weight:600;min-height:48px}
+.chips button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+
+/* place cards */
+.cards{display:grid;gap:var(--s4)}
+@media (min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column}
+.card.liked{border-color:var(--like);box-shadow:0 0 0 2px var(--like) inset}
+.card.skipped{opacity:.55}
+.art{height:150px;position:relative;display:flex;align-items:flex-end;justify-content:flex-start;padding:var(--s3)}
+.art svg{position:absolute;inset:0;width:100%;height:100%}
+.art .glyph{position:relative;font-size:3rem;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.art .tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.8rem;font-weight:700;padding:5px 10px;border-radius:999px}
+.body{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s2);flex:1}
+.facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.95rem;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:700}
+.cost{font-family:var(--display);font-weight:800;font-size:1.25rem}
+.desc{margin:0}
+.more{display:none;margin:0;color:var(--muted);font-size:1rem}
+.card.open .more{display:block}
+.morebtn{align-self:flex-start;background:none;border:0;padding:6px 0;color:var(--brand);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.votes{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);margin-top:auto;padding-top:var(--s2)}
+.vbtns{display:flex;gap:var(--s2)}
+.vbtns button{border:2px solid var(--line);background:var(--surface);border-radius:14px;min-width:64px;min-height:56px;font-size:1.5rem;padding:0 14px}
+.vbtns button[aria-pressed="true"].like{background:var(--like);border-color:var(--like);color:#fff}
+.vbtns button[aria-pressed="true"].skip{background:var(--skip);border-color:var(--skip);color:#fff}
+.faces{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.face{width:34px;height:34px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;border:2px solid var(--surface)}
+.face.l{background:var(--like);color:#fff}
+.face.s{background:var(--skip);color:#fff}
+
+/* package panel */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s4)}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3);flex-wrap:wrap}
+.total b{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--brand);font-variant-numeric:tabular-nums}
+.stack{display:flex;height:18px;border-radius:999px;overflow:hidden;background:var(--track);margin:var(--s3) 0}
+.stack span{display:block;height:100%}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:14px 1fr auto;gap:6px var(--s3);align-items:start;padding:var(--s3) 0;border-top:1px solid var(--line)}
+.dot{width:12px;height:12px;border-radius:4px;margin-top:8px}
+.rn{font-weight:700}
+.rnote{grid-column:2/4;color:var(--muted);font-size:1rem}
+.ramt{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--muted);margin-left:6px;vertical-align:3px}
+.pill.src{color:var(--leaf)}
+
+/* itinerary */
+.days{list-style:none;margin:0;padding:0;border-left:4px solid var(--line)}
+.days li{position:relative;padding:0 0 var(--s4) var(--s4)}
+.days li::before{content:"";position:absolute;left:-10px;top:8px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:4px solid var(--water)}
+.days li.play::before{border-color:var(--brand);background:var(--brand)}
+.days li.away::before{border-color:var(--canyon);background:var(--canyon)}
+.days time{font-family:var(--display);font-weight:800;display:block;font-size:1.15rem}
+.days .who2{display:block;font-size:1rem;color:var(--muted)}
+.days .picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.days .picks span{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:.95rem;font-weight:600}
+.days .picks span.you{background:var(--like);color:#fff}
+
+.notes{margin:0;padding-left:1.2em}
+.notes li{margin-bottom:var(--s3);max-width:64ch}
+.wide{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:1rem}
+th,td{text-align:left;padding:var(--s2) var(--s3);border-top:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--muted);border-top:0}
+.foot{color:var(--muted);font-size:.95rem;margin-top:var(--s6)}
+
+/* sticky summary */
+.bar{position:fixed;left:0;right:0;bottom:0;padding:10px var(--s4) calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:var(--s3);z-index:5}
+.bar b{font-family:var(--display);font-size:1.3rem;font-variant-numeric:tabular-nums}
+.bar a{background:var(--brand);color:var(--brand-ink);text-decoration:none;font-weight:700;padding:12px 18px;border-radius:999px;white-space:nowrap}
+
+.art .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.art .count{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.8rem;font-weight:700;padding:5px 10px;border-radius:999px}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:8px var(--s4) 0;scrollbar-width:none}
+.strip img{height:64px;width:86px;object-fit:cover;border-radius:8px;flex:0 0 auto}
+.rowbtns{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);flex-wrap:wrap}
+.photobtn{border:2px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.95rem;cursor:pointer;min-height:44px;display:inline-flex;align-items:center}
+.share{display:block;width:100%;margin:var(--s3) 0 0;border:0;border-radius:var(--r);background:var(--brand);color:var(--brand-ink);font-weight:800;font-size:1.1rem;padding:16px;min-height:56px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Las Vegas in December. All six of you.</h1>
+  <p class="lede">Kai plays the Regional at the Las Vegas Convention Center, 4 to 6 December. The rest is a family holiday: the Grand Canyon, seafood, some casino time for the grown-ups, and easy days for Keo. Tap the heart on anything you'd like to do. Everyone's picks show up on everyone's phone.</p>
+
+  <p style="font-weight:700;margin-bottom:4px">First, who's holding the phone?</p>
+  <div class="who" id="who" role="group" aria-label="Who are you"></div>
+  <div class="notice" id="sync"></div>
+  <button class="share" id="share" type="button">Share this link with the family</button>
+
+  <section id="build">
+    <h2>Build the trip</h2>
+    <p class="lede">Three choices set the base cost. Then your liked places add on top.</p>
+    <p class="small" style="font-weight:700;margin-bottom:6px">How long</p>
+    <div class="seg" id="segDur" style="--n:2"></div>
+    <p class="small" style="font-weight:700;margin-bottom:6px">How comfortable</p>
+    <div class="seg" id="segTier" style="--n:3"></div>
+    <p class="small" style="font-weight:700;margin-bottom:6px">Where you sleep in Vegas</p>
+    <div class="seg" id="segStay" style="--n:2"></div>
+  </section>
+
+  <section id="places">
+    <h2>Places to like or skip</h2>
+    <p class="lede">The pictures are illustrations, not photos. Costs are for the six of you, in Canadian dollars.</p>
+    <div class="chips" id="chips"></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="cost">
+    <h2>What it adds up to</h2>
+    <div class="panel" aria-live="polite">
+      <div class="total"><span id="tname" style="font-weight:700"></span><span>Plan on about <b id="tmid"></b></span></div>
+      <p class="small" id="tsub"></p>
+      <div class="stack" id="stack" aria-hidden="true"></div>
+      <ul class="rows" id="rows"></ul>
+    </div>
+  </section>
+
+  <section id="days">
+    <h2>Day by day</h2>
+    <p class="lede" id="dayslede"></p>
+    <ol class="days" id="dayList"></ol>
+  </section>
+
+  <section>
+    <h2>What the refute pass changed</h2>
+    <p class="lede">After the first research pass I tried to break each number. These are the ones that moved, and the ones I still can't prove.</p>
+    <ul class="notes">
+      <li><strong>The rodeo fills the city.</strong> The National Finals Rodeo runs 3 to 12 December at the Thomas and Mack Center, your whole window. On its first weekend, rooms average close to US$400 a night. Midweek and the second weekend run lower. I priced stays at rodeo rates, and the long trip leaves town on the busiest weekday nights.</li>
+      <li><strong>The South Rim now costs Canadians extra.</strong> Since 1 January 2026, visitors from outside the US aged 16 and up pay US$100 each on top of the US$35 car fee. For the four adults that is US$435, or US$285 with the US$250 non resident pass, which covers four adults. Kai and Keo enter free. Zion has the same rule. Grand Canyon West, Hoover Dam, Red Rock and Valley of Fire do not.</li>
+      <li><strong>Grand Canyon West kids-free deal only works at the window.</strong> Buy an adult pass in person and up to two kids aged 5 to 12 enter free. Booking online forfeits it. Keo is free either way. The site says it is not wheelchair accessible, and you park at the gate and ride shuttles between viewpoints.</li>
+      <li><strong>Flights are recent prices, not quotes for your dates.</strong> Air Canada and Porter fly nonstop. Sale fares hit CA$188 to CA$291 return this year; Google Flights shows Air Canada from CA$351. Early December with a rodeo in town will sit higher, so I used CA$380 to CA$550 a seat, and more for the comfort plus tier. Keo is 3, so he needs his own seat.</li>
+      <li><strong>December at the South Rim is real winter.</strong> Highs around 7°C, nights well below freezing, a few inches of snow most weeks. The Rim Trail is paved and flat, so Stephanie and Fei will be fine with warm layers. Hermit Road closes to cars from 1 December, which means less driving and more shuttle.</li>
+      <li><strong>Still unproven.</strong> Rodeo week hotel rates for your exact nights, Kai's Vegas entry fee (Louisville was US$40, I assumed the same), the Polar Express dates in Williams, Discovery Children's Museum pricing, and every food figure. Each line below says sourced or estimate.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Where each number comes from</h2>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Number</th><th>What I found</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Venue and dates</td><td>Las Vegas Convention Center, North Hall N3 and N4, 4 to 6 December 2026</td><td><a href="https://championships.pokemon.com/en-us/events/regionals/2027/las-vegas">Pokémon</a></td></tr>
+          <tr><td>Rodeo dates and rates</td><td>3 to 12 December 2026; first weekend rooms near US$400, second weekend under US$270 (2023 survey)</td><td><a href="https://www.axs.com/teams/1117248/national-finals-rodeo-tickets">AXS</a>, <a href="https://develop.reviewjournal.com/?p=2667706">Review Journal</a></td></tr>
+          <tr><td>Flights</td><td>Nonstop on Air Canada and Porter; sale fares CA$188 to CA$291; Google Flights from CA$351</td><td><a href="https://www.yyzdeals.com/toronto-to-las-vegas-250-cad-roundtrip">YYZ Deals</a>, <a href="https://www.google.com/travel/flights/flights-from-toronto-to-las-vegas.html">Google Flights</a></td></tr>
+          <tr><td>Minivan</td><td>Seven seat vans average US$105 a day; lows near US$58</td><td><a href="https://www.momondo.com/car-rental/7-passenger-van-rentals-Las-Vegas.35107.7-cva.ksp">momondo</a>, <a href="https://www.kayak.com/Las-Vegas-7-Passenger-Van-Rentals.35107.7-lcv.ksp">KAYAK</a></td></tr>
+          <tr><td>Grand Canyon West</td><td>All access with Skywalk US$99 plus tax; general US$67; kids free at the window</td><td><a href="https://grandcanyonskywalktours.com/grand-canyon-skywalk-tickets-prices.html">Skywalk tickets guide</a>, <a href="https://grandcanyon.com/planning/west-planning/grand-canyon-skywalk-price-tickets/">GrandCanyon.com</a></td></tr>
+          <tr><td>South Rim fees</td><td>US$35 per car for 7 days, plus US$100 per non resident 16 and up, or a US$250 pass for four adults</td><td><a href="https://www.nps.gov/grca/planyourvisit/fees.htm">National Park Service</a></td></tr>
+          <tr><td>South Rim in December</td><td>Highs about 45°F, lows mid teens, 2 to 4 inches of snow; Tusayan hotels from about US$143 with tax</td><td><a href="https://www.anytraveltips.com/travel-listing/grand-canyon-december">Any Travel Tips</a>, <a href="https://thingstodoingrandcanyon.com/month/december/">Things to do in Grand Canyon</a></td></tr>
+          <tr><td>Shark Reef</td><td>US$29 adult, US$27 seniors, US$24 kids 5 to 12, under 5 free</td><td><a href="https://www.feelingvegas.com/web-stories/does-shark-reef-have-locals-discount-or-military-discount-story/">Feeling Vegas</a></td></tr>
+          <tr><td>Bacchanal Buffet</td><td>Weekend dinner US$50.99, kids 4 to 10 US$26.99, under 4 free</td><td><a href="https://lasvegassun.com/places/bacchanal-buffet/">Las Vegas Sun</a></td></tr>
+          <tr><td>Family suites</td><td>Two bedroom suites with kitchens at Hilton Grand Vacations, Holiday Inn Club Vacations and condo rentals near the Strip</td><td><a href="https://www.lasvegaskids.net/hotels/family-hotel-rooms-suites/">Las Vegas Kids</a></td></tr>
+          <tr><td>Exchange rate</td><td>US$1 = CA$1.39</td><td><a href="https://ycharts.com/indicators/canadian_dollar_to_us_dollar_exchange_rate_ecbeer">YCharts</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">Researched 23 September 2026. Version 1.1, hosted on Replit with shared hearts and family photos. "Sourced" means I found a published price. "Estimate" means I built the number from typical costs, so treat it as softer.</p>
+  </section>
+</main>
+
+<div class="bar"><span><span class="small">Your trip</span><br><b id="barTotal"></b></span><a href="#cost">See the breakdown</a></div>
+
+<script>
+(function(){
+  var FX = 1.39;
+  var PEOPLE = ["David","Lauren","Kai","Stephanie","Fei"];
+  var DUR = {
+    short:{label:"6 nights", sub:"Wed 2 to Tue 8 Dec", nights:6, vegasNights:6, away:0},
+    long:{label:"10 nights", sub:"Wed 2 to Sat 12 Dec", nights:10, vegasNights:8, away:2}
+  };
+  var TIER = {
+    budget:{label:"Budget", sub:"Cheapest fares, hawker style food", flight:[380,470], food:[210,290], bags:[0,240], ins:[250,330]},
+    comfort:{label:"Comfort", sub:"Carry on included, real dinners", flight:[450,560], food:[330,440], bags:[0,0], ins:[300,400]},
+    plus:{label:"Comfort plus", sub:"Extra legroom or premium, good restaurants", flight:[700,950], food:[500,650], bags:[0,0], ins:[380,480]}
+  };
+  var STAY = {
+    rooms:{label:"Two hotel rooms", sub:"CA$320 to CA$470 a night", lo:320, hi:470,
+      note:"Two rooms at a family hotel a short drive from the Strip, rodeo week rates. Free parking. You eat out or bring breakfast in."},
+    suite:{label:"One big suite with kitchen", sub:"CA$420 to CA$640 a night", lo:420, hi:640,
+      note:"A two bedroom suite with a full kitchen and laundry, such as Hilton Grand Vacations, Holiday Inn Club Vacations or a condo rental. Keo naps, Stephanie makes tea, and breakfasts stay cheap."}
+  };
+  // id, name, cat, glyph, palette, days, drive, walk, best for, cost lo/hi CAD for 6, short desc, more, slot(long), slot(short), confidence
+  var PLACES = [
+    ["gcw","Grand Canyon West and the Skywalk","canyon","🏜️","canyon",1,"2.5 hours each way","Easy to moderate","Everyone",470,620,
+      "The Grand Canyon you can do in one day from Vegas. A glass bridge hangs 4,000 feet over the canyon floor.",
+      "You park at the gate and ride free shuttles between Eagle Point, the Skywalk and Guano Point. Buy adult passes at the ticket window so Kai gets in free. Keo is free. Umbrella stroller is fine on the paved bits. Not part of the national park, so no US$100 surcharge. Pack lunch or eat at Guano Point.","away","d5","Sourced"],
+    ["south","Grand Canyon South Rim, two nights","canyon","🏔️","snow",2,"4.5 hours each way","Easy, paved rim path","Everyone, dressed warm",1400,2100,
+      "The iconic one. Snow dusted rims, almost no crowds, and sunrise from El Tovar's window.",
+      "Stay in Tusayan, 10 minutes from the gate, in two rooms. Day one: drive down with a Hoover Dam photo stop, sunset at Mather Point. Day two: the flat Rim Trail, the Yavapai geology museum (heated), a ranger walk. Entry is US$35 per car plus US$100 per adult from outside the US, or the US$250 pass for all four adults. Highs around 7°C, so real winter coats. The cost covers hotel, entry and fuel.","away","","Sourced"],
+    ["polar","Polar Express train in Williams","kids","🚂","snow",0,"On the way back from the South Rim","None","Keo and Kai",300,420,
+      "A 90 minute night train to the North Pole with cocoa, cookies and Santa. Keo will lose his mind.",
+      "Runs from the Grand Canyon Railway depot in Williams, an hour south of the South Rim, most December evenings. Tickets start near US$44 each. Book early; it sells out. Only fits the 10 night trip, on the way home from the canyon.","away","","Estimate"],
+    ["hoover","Hoover Dam","outdoors","🌉","water",0,"45 minutes","Easy","Everyone",60,220,
+      "Walk across the top of the dam for free, or take the guided tour into the power plant.",
+      "Parking is US$10. Looking is free. The power plant tour runs about US$15 an adult and kids under 4 are free; the longer dam tour is US$30 and needs kids 8 and up. Pairs well with the West Rim day or the drive to the South Rim.","d6","d5","Sourced"],
+    ["redrock","Red Rock Canyon scenic drive","outdoors","🪨","canyon",0,"30 minutes","Easy to moderate","Everyone",30,45,
+      "A 13 mile loop of red sandstone right outside the city. Short walks from every pull out.",
+      "US$20 per car. From October to May you need a timed entry reservation for the loop, booked online for US$2. Calico Hills is the photo stop. Half a day, done by lunch.","d9","d6","Sourced"],
+    ["vof","Valley of Fire","outdoors","🔥","canyon",0,"1 hour","Easy","Everyone",25,40,
+      "Bright red rock, ancient petroglyphs and a beehive shaped formation Keo can climb on.",
+      "US$15 per car for out of state visitors. The Mouse's Tank trail is flat, sandy and short. Elephant Rock is right by the road. Bring a picnic; there is no food inside the park.","d9","d6","Sourced"],
+    ["zion","Zion, one long day","canyon","🌲","leaf",0,"2.5 hours each way","Easy paved walks","Adults and Kai",480,560,
+      "Utah's cathedral of a canyon. In December you can drive the scenic road yourself.",
+      "Same fee rule as the South Rim: US$35 per car plus US$100 per non resident adult, or the pass if you already bought it for the South Rim. The Riverside Walk is paved and stroller friendly. A long day for Keo; consider only if you skip the South Rim.","d10","","Sourced"],
+    ["charleston","Snow play at Mount Charleston","outdoors","⛄","snow",0,"45 minutes","Easy","Keo and Kai",0,40,
+      "Real snow, 8,000 feet up, an hour from the Strip. Sledding for the kids, hot chocolate for everyone.",
+      "Free to visit. Lee Canyon has a snow play area with tube rentals when there is snow. Check conditions the day before; some Decembers are dry.","d10","d6","Estimate"],
+    ["seven","Seven Magic Mountains","outdoors","🎨","neon",0,"30 minutes","None","Everyone",0,0,
+      "Seven stacks of neon boulders in the desert. A 20 minute stop and one great family photo.",
+      "Free. On the highway south of the city. Combine with Grand Canyon West or Hoover Dam.","d6","d5","Sourced"],
+    ["bellagio","Bellagio Conservatory holiday display and fountains","strip","🎄","neon",0,"On the Strip","Easy","Everyone",0,0,
+      "December turns the conservatory into a glass house of Christmas trees and lights. The fountains dance every 15 minutes.",
+      "Both free. Go in the evening after dinner. Stephanie and Fei can settle at the tables afterward while you walk the kids.","d3","d3","Sourced"],
+    ["shark","Shark Reef Aquarium at Mandalay Bay","kids","🦈","water",0,"On the Strip","Easy","Keo and Kai",120,150,
+      "A walk through tunnel with sharks overhead and a touch pool for Keo.",
+      "US$29 adults, US$27 for Stephanie and Fei, US$24 for Kai, Keo free. Book a timed slot online. An hour, then lunch at Mandalay Bay.","d9","d6","Sourced"],
+    ["discovery","Discovery Children's Museum","kids","🧒","leaf",0,"Downtown","Easy","Keo, with Kai tolerating it",120,170,
+      "Three floors of hands on play. This is Keo's best day in Vegas while Kai is at the tournament.",
+      "About US$20 a person; grown ups pay too. Perfect for Stephanie, Fei and Keo on Saturday while you and Lauren are at the hall.","d4","d4","Estimate"],
+    ["ethel","Ethel M chocolate factory and holiday cactus lights","kids","🍫","leaf",0,"25 minutes","Easy","Everyone",0,40,
+      "A free chocolate factory tour, then a cactus garden lit with a million lights.",
+      "The factory tour is free and short. In December the garden lights up after dark, with a small entry fee some nights. An easy evening, close to the airport side of town.","d8","d3","Estimate"],
+    ["high","High Roller wheel at sunset","strip","🎡","neon",0,"On the Strip","None","Everyone",200,280,
+      "A 30 minute slow turn 550 feet over the Strip. Good for anyone who doesn't want to walk.",
+      "About US$25 to US$35 a person. Sunset slots cost more. Keo is free under 3; he'll be 3, so check the cut off when you book.","d8","d7","Sourced"],
+    ["fremont","Fremont Street and old Vegas","strip","💡","neon",0,"Downtown","Easy","Adults, Kai for the lights",0,60,
+      "The canopy light show every hour, cheaper casinos, and the old neon signs.",
+      "Free to walk. The grown ups' casinos here have lower minimums than the Strip. Good for a grandparents' evening while you take the kids back.","d10","d7","Sourced"],
+    ["sphere","The Sphere","strip","🔮","neon",0,"Next to the Convention Center","None","Adults and Kai",550,900,
+      "The giant screen ball beside Kai's venue. The inside film is like nothing else.",
+      "US$100 to US$180 a ticket. Loud and dark, so not for Keo. A treat for Kai after his tournament, with grandparents on Keo duty.","d7","d7","Sourced"],
+    ["casino","Casino evenings, in shifts","strip","🎰","neon",0,"On the Strip","None","Stephanie, Fei, you and Lauren",0,0,
+      "Two nights where the adults trade off. Grandparents go first while you handle bedtime; then you two go.",
+      "No cost line here; that's your own budget. The Strip's slots and table minimums are lowest midweek. Fremont Street is cheaper still.","d8","d7","Estimate"],
+    ["bacchanal","Bacchanal Buffet seafood dinner","food","🦀","water",0,"Caesars Palace","None","Everyone",380,450,
+      "Crab legs, oysters, prime rib and 200 other things. One big family dinner.",
+      "Weekend dinner US$51 an adult, US$27 for Kai, Keo free. Book a time online; the line is long without it.","d3","d3","Sourced"],
+    ["oyster","Oyster Bar pan roast at Palace Station","food","🍲","water",0,"10 minutes off Strip","None","Adults and Kai",150,220,
+      "A tiny counter famous for its spicy seafood pan roast. Locals line up for it.",
+      "About US$25 to US$40 a plate. There are only 18 seats and no bookings, so go at 3 pm on a weekday. Send the grandparents and Kai while Keo naps.","d9","d6","Estimate"],
+    ["joes","Joe's Seafood, Prime Steak and Stone Crab","food","🦞","water",0,"Forum Shops at Caesars","None","Everyone",550,800,
+      "The special occasion seafood dinner. Stone crab claws with mustard sauce, key lime pie.",
+      "US$60 to US$100 a head. Book weeks ahead for a table of six. This is the comfort plus night out.","d11","d7","Estimate"],
+    ["chinatown","Chinatown seafood on Spring Mountain Road","food","🐟","leaf",0,"10 minutes off Strip","None","Everyone",200,320,
+      "Steamed whole fish, lobster with ginger and scallion, and dim sum. Cheaper than the Strip and better for a table of six.",
+      "US$25 to US$45 a head. Try Boathouse Asian Eatery or the Chinatown Plaza places. Easy parking, big round tables, high chairs.","d4","d4","Estimate"]
+  ];
+  var CATS = [["all","Everything"],["canyon","Grand Canyon"],["outdoors","Outdoors"],["kids","For the kids"],["strip","The Strip"],["food","Seafood and food"]];
+  var PAL = {
+    canyon:["#7C2D12","#C2410C","#F59E0B","#FDE68A"],
+    snow:["#1E3A5F","#3B82F6","#BFDBFE","#F8FAFC"],
+    water:["#164E63","#0E7490","#22D3EE","#CFFAFE"],
+    neon:["#2E1065","#7C3AED","#EC4899","#FDE047"],
+    leaf:["#14532D","#15803D","#86EFAC","#FEF3C7"]
+  };
+  function art(pal, seed){
+    var p = PAL[pal]; var s = seed*37%100;
+    return '<svg viewBox="0 0 400 150" preserveAspectRatio="none" aria-hidden="true">'+
+      '<rect width="400" height="150" fill="'+p[0]+'"/>'+
+      '<circle cx="'+(300-s)+'" cy="38" r="26" fill="'+p[3]+'" opacity=".9"/>'+
+      '<path d="M0 110 Q '+(80+s)+' 60 160 100 T 400 90 V150 H0Z" fill="'+p[1]+'"/>'+
+      '<path d="M0 130 Q '+(120-s)+' 95 240 125 T 400 120 V150 H0Z" fill="'+p[2]+'" opacity=".85"/>'+
+      '</svg>';
+  }
+
+  var COLORS = ["#C2410C","#0E7490","#15803D","#F59E0B","#7C3AED","#EC4899","#0F766E","#9CA3AF","#B45309","#3B82F6","#DC2626","#65A30D"];
+  var state = {me:null, dur:"long", tier:"comfort", stay:"suite"};
+  var votes = {}; // person -> {placeId: "like"|"skip"}
+  var shared = false, db = null, meDocs = {};
+  try{ var s = JSON.parse(localStorage.getItem("lv26")||"null"); if(s){ state = Object.assign(state, s.state||{}); votes = s.votes||{}; } }catch(e){}
+  function saveLocal(){ try{ localStorage.setItem("lv26", JSON.stringify({state:state, votes:votes})); }catch(e){} }
+  function money(n){ return "CA$"+Math.round(n).toLocaleString("en-CA"); }
+  function r10(n){ return Math.round(n/10)*10; }
+  function place(id){ for(var i=0;i<PLACES.length;i++) if(PLACES[i][0]===id) return PLACES[i]; }
+  function likedIds(){
+    var out = {};
+    Object.keys(votes).forEach(function(p){ Object.keys(votes[p]).forEach(function(id){ if(votes[p][id]==="like") out[id]=(out[id]||0)+1; }); });
+    return Object.keys(out).filter(function(id){ var pl = place(id); return pl && (state.dur==="long" || pl[14]!==""); });
+  }
+
+  // ---------- shared votes (server) ----------
+  var syncEl = document.getElementById("sync");
+  function setSync(t){ syncEl.textContent = t; }
+  var shared = false, photos = {};
+  function pullVotes(){
+    return fetch("/api/votes",{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(all){
+      Object.keys(all).forEach(function(p){ if(!(p===state.me && writing[p])) votes[p]=all[p]||{}; });
+      if(!shared){ shared=true; setSync("Picks are shared. Everyone who opens this link sees the same hearts."); }
+      saveLocal(); render();
+    }).catch(function(){ if(shared||!syncEl.textContent){ shared=false; setSync("Can't reach the shared list right now. Picks stay on this phone until it's back."); } });
+  }
+  function pullPhotos(){
+    return fetch("/api/photos",{cache:"no-store"}).then(function(r){ return r.json(); }).then(function(p){ photos=p||{}; render(); }).catch(function(){});
+  }
+  setSync("Connecting to the shared list…");
+  pullVotes(); pullPhotos();
+  setInterval(pullVotes, 10000); setInterval(pullPhotos, 30000);
+  var writing = {};
+  function pushVote(person){
+    writing[person]=true;
+    fetch("/api/votes/"+person,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({picks:votes[person]||{}})})
+      .then(function(r){ if(!r.ok) throw 0; shared=true; setSync("Picks are shared. Everyone who opens this link sees the same hearts."); })
+      .catch(function(){ shared=false; setSync("Couldn't save to the shared list. Picks stay on this phone until it's back."); })
+      .then(function(){ writing[person]=false; });
+  }
+  function shrink(file){
+    return new Promise(function(res, rej){
+      var img = new Image(); var url = URL.createObjectURL(file);
+      img.onload = function(){
+        var w = img.width, h = img.height, max = 1200; var sc = Math.min(1, max/Math.max(w,h));
+        var c = document.createElement("canvas"); c.width = Math.round(w*sc); c.height = Math.round(h*sc);
+        c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url);
+        res(c.toDataURL("image/jpeg",0.82));
+      };
+      img.onerror = rej; img.src = url;
+    });
+  }
+  function addPhoto(id, file, btn){
+    btn.textContent = "Uploading…"; btn.disabled = true;
+    shrink(file).then(function(dataUrl){
+      return fetch("/api/photos/"+id,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dataUrl:dataUrl})});
+    }).then(function(r){ if(!r.ok) throw 0; return pullPhotos(); })
+      .catch(function(){ btn.textContent = "Upload failed, try again"; btn.disabled = false; });
+  }
+  function vote(id, v){
+    if(!state.me){ alert("Tap your name at the top first, so we know whose pick this is."); return; }
+    votes[state.me] = votes[state.me]||{};
+    if(votes[state.me][id]===v) delete votes[state.me][id]; else votes[state.me][id]=v;
+    saveLocal(); pushVote(state.me); render();
+  }
+
+  // ---------- costs ----------
+  function build(){
+    var d = DUR[state.dur], t = TIER[state.tier], st = STAY[state.stay];
+    var list = [];
+    list.push(["Flights for six", t.flight[0]*6, t.flight[1]*6, "Nonstop on Air Canada or Porter, about 5 hours. Keo is 3, so he needs a seat. "+(state.tier==="budget"?"Basic fares; carry on costs extra.":state.tier==="plus"?"Extra legroom or premium seats.":"Carry on included."), "Sourced"]);
+    if(t.bags[1]) list.push(["Bags", t.bags[0], t.bags[1], "Zero if you all travel with personal items only. Up to CA$60 a bag each way.", "Estimate"]);
+    list.push(["Vegas stay, "+d.vegasNights+" nights", st.lo*d.vegasNights, st.hi*d.vegasNights, st.note, "Sourced"]);
+    list.push(["Minivan, "+(d.nights+1)+" days", Math.round(140*(d.nights+1)), Math.round(190*(d.nights+1)), "Seven seats with a car seat for Keo, taxes in. Plus gas.", "Sourced"]);
+    list.push(["Gas and parking", state.dur==="long"?180:120, state.dur==="long"?280:200, "Cheap US gas. Strip garages charge US$15 to US$25 a day, so choose a stay with free parking.", "Estimate"]);
+    list.push(["Food for six, "+(d.nights+1)+" days", t.food[0]*(d.nights+1), t.food[1]*(d.nights+1), "Breakfasts in, lunches simple, one real dinner. The seafood nights you like are added separately.", "Estimate"]);
+    list.push(["Getting to Pearson", 320, 420, "Stephanie and Fei park at Pearson for the trip, about CA$20 a day. You take a ride or park too.", "Estimate"]);
+    list.push(["Travel insurance for six", t.ins[0], t.ins[1], "Medical cover. Stephanie's and Fei's are the pricier ones.", "Estimate"]);
+    list.push(["Kai's entry and tournament extras", 60, 200, "US$40 entry, snacks and a merch run. Your guardian badges are free.", "Estimate"]);
+    likedIds().forEach(function(id){ var p = place(id); if(p[9]||p[10]) list.push([p[1], p[9], p[10], p[11], p[15]]); });
+    var lo=0, hi=0; list.forEach(function(i){ lo+=i[1]; hi+=i[2]; });
+    return {list:list, lo:lo, hi:hi};
+  }
+
+  // ---------- itinerary ----------
+  var SLOTS_LONG = [
+    ["Wed 2 Dec","d2","Fly Toronto to Las Vegas, about 5 hours. Pick up the van. Early dinner, early bed; it is 3 hours behind home.","All six",""],
+    ["Thu 3 Dec","d3","Easy day. Kai registers and playtests. Walk the Strip after dark.","All six","play"],
+    ["Fri 4 Dec","d4","Kai's Day 1. David, Lauren and Kai at the hall from 8 am. Stephanie, Fei and Keo take the van for a slow day.","Split day","play"],
+    ["Sat 5 Dec","d4b","Kai's Day 2 if he makes the cut, or a rest day. Grandparents and Keo repeat their favourite.","Split day","play"],
+    ["Sun 6 Dec","d5","Tournament finals. If Kai is done, a half day out for everyone.","All six","play"],
+    ["Mon 7 Dec","away","Leave the rodeo crowds. Drive to the Grand Canyon.","All six","away"],
+    ["Tue 8 Dec","away2","Grand Canyon day.","All six","away"],
+    ["Wed 9 Dec","d9","Drive back to Vegas. Stop on the way.","All six",""],
+    ["Thu 10 Dec","d10","A nature day close to the city.","All six",""],
+    ["Fri 11 Dec","d11","Last full day. Kids' pick in the morning, big seafood dinner.","All six",""],
+    ["Sat 12 Dec","","Fly home. Land in Toronto in the evening.","All six",""]
+  ];
+  var SLOTS_SHORT = [
+    ["Wed 2 Dec","d2","Fly Toronto to Las Vegas, about 5 hours. Pick up the van. Early bed.","All six",""],
+    ["Thu 3 Dec","d3","Easy day. Kai registers and playtests. Walk the Strip after dark.","All six","play"],
+    ["Fri 4 Dec","d4","Kai's Day 1. David, Lauren and Kai at the hall. Stephanie, Fei and Keo take the van.","Split day","play"],
+    ["Sat 5 Dec","d4b","Kai's Day 2 or a rest day.","Split day","play"],
+    ["Sun 6 Dec","d5","Finals, then the Grand Canyon West day trip if Kai is out, or on Monday.","All six","play"],
+    ["Mon 7 Dec","d6","The nature day.","All six",""],
+    ["Tue 8 Dec","d7","Morning fun, then fly home in the evening.","All six",""]
+  ];
+  function renderDays(){
+    var slots = state.dur==="long"?SLOTS_LONG:SLOTS_SHORT;
+    var liked = likedIds();
+    var col = state.dur==="long"?13:14;
+    document.getElementById("dayslede").textContent = state.dur==="long"
+      ? "Ten nights. Vegas for the tournament, then out to the canyon while the rodeo weekend prices fall, then back for the last days."
+      : "Six nights. Tournament first, then two full days out. The Grand Canyon fits as a day trip only.";
+    var ol = document.getElementById("dayList"); ol.innerHTML="";
+    slots.forEach(function(s){
+      var li = document.createElement("li"); li.className = s[4];
+      var picks = liked.filter(function(id){ var p = place(id); var slot = p[col]; return slot===s[1] || (s[1]==="away2" && slot==="away" && p[5]<2) || (s[1]==="d4b" && p[col]==="d4"); });
+      var html = '<time>'+s[0]+'</time><span class="who2">'+s[3]+'</span>'+s[2];
+      if(s[1]==="away" && state.dur==="long"){
+        var hasSouth = liked.indexOf("south")>=0, hasWest = liked.indexOf("gcw")>=0;
+        if(hasSouth) html += " South Rim: 4.5 hours with a Hoover Dam stop. Sleep in Tusayan.";
+        else if(hasWest) html += " Grand Canyon West is a day trip, so you can sleep in Vegas and skip the hotel move.";
+        else html += " Like a Grand Canyon card above to fill these two days.";
+      }
+      if(picks.length){ html += '<div class="picks">'+picks.map(function(id){ return '<span class="you">'+place(id)[3]+' '+place(id)[1]+'</span>'; }).join("")+'</div>'; }
+      li.innerHTML = html; ol.appendChild(li);
+    });
+  }
+
+  // ---------- render ----------
+  var cat = "all";
+  function seg(el, obj, key){
+    el.innerHTML="";
+    Object.keys(obj).forEach(function(k){
+      var b = document.createElement("button"); b.type="button"; b.setAttribute("aria-pressed", String(state[key]===k));
+      b.innerHTML = obj[k].label+"<small>"+obj[k].sub+"</small>";
+      b.addEventListener("click", function(){ state[key]=k; saveLocal(); render(); });
+      el.appendChild(b);
+    });
+  }
+  function render(){
+    var who = document.getElementById("who"); who.innerHTML="";
+    PEOPLE.forEach(function(p){
+      var b = document.createElement("button"); b.type="button"; b.textContent=p; b.setAttribute("aria-pressed", String(state.me===p));
+      b.addEventListener("click", function(){ state.me=p; saveLocal(); render(); }); who.appendChild(b);
+    });
+    seg(document.getElementById("segDur"), DUR, "dur");
+    seg(document.getElementById("segTier"), TIER, "tier");
+    seg(document.getElementById("segStay"), STAY, "stay");
+    var chips = document.getElementById("chips"); chips.innerHTML="";
+    CATS.forEach(function(c){
+      var b = document.createElement("button"); b.type="button"; b.textContent=c[1]; b.setAttribute("aria-pressed", String(cat===c[0]));
+      b.addEventListener("click", function(){ cat=c[0]; render(); }); chips.appendChild(b);
+    });
+    var cards = document.getElementById("cards"); cards.innerHTML="";
+    PLACES.forEach(function(p, i){
+      if(cat!=="all" && p[2]!==cat) return;
+      var my = state.me && votes[state.me] ? votes[state.me][p[0]] : null;
+      var c = document.createElement("article"); c.className="card"+(my==="like"?" liked":my==="skip"?" skipped":"");
+      var onlyLong = p[14]==="" ? '<span class="tag">10 night trip only</span>' : '';
+      var faces = PEOPLE.map(function(person){ var v = votes[person]&&votes[person][p[0]]; if(!v) return ""; return '<span class="face '+(v==="like"?"l":"s")+'" title="'+person+'">'+person.slice(0,2)+'</span>'; }).join("");
+      var ph = photos[p[0]]||[]; var artHtml = ph.length ? '<img class="photo" src="'+ph[ph.length-1]+'" alt="">' : art(p[4], i)+'<span class="glyph">'+p[3]+'</span>';
+      c.innerHTML = '<div class="art">'+artHtml+onlyLong+(ph.length>1?'<span class="count">'+ph.length+' photos</span>':'')+'</div>'+
+        (ph.length>1?'<div class="strip">'+ph.map(function(u){return '<img src="'+u+'" alt="">';}).join("")+'</div>':'')+
+        '<div class="body"><h3>'+p[1]+'</h3>'+
+        '<div class="facts"><span>🚗 <b>'+p[6]+'</b></span><span>🚶 <b>'+p[7]+'</b></span><span>👨‍👩‍👧‍👦 <b>'+p[8]+'</b></span></div>'+
+        '<div class="cost">'+(p[10]===0?"Free":money(p[9])+" to "+money(p[10]))+'<span class="pill'+(p[15]==="Sourced"?" src":"")+'">'+p[15]+'</span></div>'+
+        '<p class="desc">'+p[11]+'</p><p class="more">'+p[12]+'</p>'+
+        '<div class="rowbtns"><button class="morebtn" type="button">More detail</button><label class="photobtn">Add a photo<input type="file" accept="image/*" hidden></label></div>'+
+        '<div class="votes"><div class="vbtns"><button class="like" type="button" aria-label="Like" aria-pressed="'+(my==="like")+'">♥</button><button class="skip" type="button" aria-label="Skip" aria-pressed="'+(my==="skip")+'">✕</button></div><div class="faces">'+faces+'</div></div></div>';
+      c.querySelector(".morebtn").addEventListener("click", function(){ c.classList.toggle("open"); this.textContent = c.classList.contains("open")?"Less":"More detail"; });
+      c.querySelector(".photobtn input").addEventListener("change", function(e){ if(e.target.files[0]) addPhoto(p[0], e.target.files[0], c.querySelector(".photobtn")); });
+      c.querySelector(".like").addEventListener("click", function(){ vote(p[0],"like"); });
+      c.querySelector(".skip").addEventListener("click", function(){ vote(p[0],"skip"); });
+      cards.appendChild(c);
+    });
+    var t = build();
+    document.getElementById("tname").textContent = DUR[state.dur].label+", "+TIER[state.tier].label.toLowerCase()+", "+STAY[state.stay].label.toLowerCase();
+    document.getElementById("tmid").textContent = money(r10((t.lo+t.hi)/2));
+    document.getElementById("tsub").textContent = "Range "+money(r10(t.lo))+" to "+money(r10(t.hi))+" for all six, door to door. Liked places are included; skipped ones are not.";
+    document.getElementById("barTotal").textContent = money(r10(t.lo))+" to "+money(r10(t.hi));
+    var stack = document.getElementById("stack"), rows = document.getElementById("rows"); stack.innerHTML=""; rows.innerHTML="";
+    var sum=0; t.list.forEach(function(i){ sum+=(i[1]+i[2])/2; });
+    t.list.forEach(function(i, idx){
+      var col = COLORS[idx%COLORS.length];
+      var sp = document.createElement("span"); sp.style.width=((i[1]+i[2])/2/sum*100)+"%"; sp.style.background=col; stack.appendChild(sp);
+      var li = document.createElement("li");
+      li.innerHTML = '<span class="dot" style="background:'+col+'"></span><span class="rn">'+i[0]+'<span class="pill'+(i[4]==="Sourced"?" src":"")+'">'+i[4]+'</span></span><span class="ramt">'+(i[1]===i[2]?money(i[1]):money(i[1])+" to "+money(i[2]))+'</span><span class="rnote">'+i[3]+'</span>';
+      rows.appendChild(li);
+    });
+    renderDays();
+  }
+  render();
+  document.getElementById("share").addEventListener("click", function(){
+    var url = location.href.split("#")[0]; var b = this;
+    if(navigator.share){ navigator.share({title:"Las Vegas family trip planner", url:url}).catch(function(){}); return; }
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function(){ b.textContent="Link copied. Paste it into a text."; }).catch(function(){ prompt("Copy this link", url); });
+  });
+})();
+</script>
+</body>
+</html>
