@@ -13,7 +13,9 @@ if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required for per
 const db = new Pool({ connectionString: process.env.DATABASE_URL });
 const PEOPLE = ["David", "Lauren", "Stephanie"];
 
-function storage() { return new Client(); }
+// This project's bucket is explicit because the default-bucket lookup is not
+// populated consistently in the development and published environments.
+function storage() { return new Client({ bucketId: "replit-objstore-f6d95fd9-a27a-4684-8f75-7a61b80c0c21" }); }
 
 function stored(result) {
   if (!result.ok) throw new Error(String(result.error));
@@ -55,8 +57,8 @@ app.get("/api/photo/:key", async (req, res) => {
     const key = req.params.key;
     const row = await db.query("SELECT 1 FROM trip_photos WHERE object_key = $1", [key]);
     if (!row.rowCount) return res.sendStatus(404);
-    const b = stored(await storage().downloadAsBytes(key));
-    res.set("Content-Type", "image/jpeg").set("Cache-Control", "public, max-age=86400").send(b);
+    const chunks = stored(await storage().downloadAsBytes(key));
+    res.set("Content-Type", "image/jpeg").set("Cache-Control", "public, max-age=86400").send(Buffer.concat(chunks));
   } catch (e) { res.sendStatus(500); }
 });
 app.post("/api/photos/:place", async (req, res) => {

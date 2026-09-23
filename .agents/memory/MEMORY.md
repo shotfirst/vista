@@ -1,0 +1,1 @@
+- [App Storage bucket discovery](app-storage-bucket-discovery.md) — a created bucket may not resolve through the SDK's default lookup; verify storage after restart.

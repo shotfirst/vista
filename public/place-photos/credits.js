@@ -8,7 +8,7 @@ window.PLACE_PHOTOS = {
   vof: { author: "Gzzz", license: "CC BY 4.0", source: "https://commons.wikimedia.org/wiki/File:Road_in_Valley_of_Fire.jpg" },
   zion: { author: "Diliff", license: "CC BY-SA 3.0", source: "https://commons.wikimedia.org/wiki/File:Zion_angels_landing_view.jpg" },
   charleston: { author: "Stan Shebs", license: "CC BY-SA 3.0", source: "https://commons.wikimedia.org/wiki/File:Charleston_Peak_from_east_1.jpg" },
-  seven: { author: "planeta", license: "CC BY-SA 2.0", source: "https://commons.wikimedia.org/wiki/File:2020-02-12_Seven_Magic_Mountains_12.jpg" },
+  seven: { author: "anokarina", license: "CC BY-SA 2.0", source: "https://commons.wikimedia.org/wiki/File:%E2%80%9CWe_had_to_make_a_pit_stop_to_pray_to_the_gay_rock_gods.%E2%80%9D_%E2%80%95_@fryguy85_(33461139114).jpg" },
   bellagio: { author: "Forest and Kim Starr", license: "CC BY 2.0", source: "https://commons.wikimedia.org/wiki/File:Starr-071225-0746-Euphorbia_pulcherrima-Christmas_display_at_Bellagio_conservatory_with_Kim-Las_Vegas-Nevada_(30707811623).jpg" },
   shark: { author: "daryl_mitchell", license: "CC BY-SA 2.0", source: "https://commons.wikimedia.org/wiki/File:Zebra_Shark_-_Shark_Reef_Aquarium_at_Mandalay_Bay.jpg" },
   discovery: { author: "June H. Johns", license: "CC BY-SA 3.0", source: "https://commons.wikimedia.org/wiki/File:The_Smith_Center_for_the_Performing_Arts_%26_DISCOVERY_Children%27s_Museum.jpg" },
