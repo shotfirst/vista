@@ -186,7 +186,7 @@ th{font-weight:700;color:var(--muted);border-top:0}
 
   <section id="places">
     <h2>Places to like or skip</h2>
-    <p class="lede">The pictures are illustrations, not photos. Costs are for the six of you, in Canadian dollars.</p>
+    <p class="lede">Browse five credited photo choices for each place. Some food and play photos are labeled as general examples. Costs are for the six of you, in Canadian dollars.</p>
     <div class="chips" id="chips"></div>
     <div class="cards" id="cards"></div>
   </section>
@@ -353,7 +353,7 @@ th{font-weight:700;color:var(--muted);border-top:0}
   // ---------- shared votes (server) ----------
   var syncEl = document.getElementById("sync");
   function setSync(t){ syncEl.textContent = t; }
-  var shared = false, photos = {}, alternateCredits = {};
+  var shared = false, photos = {}, alternateCredits = {}, extraCredits = {};
   function pullVotes(){
     return fetch("/api/votes",{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(all){
       Object.keys(all).forEach(function(p){ if(!(p===state.me && writing[p])) votes[p]=all[p]||{}; });
@@ -366,6 +366,13 @@ th{font-weight:700;color:var(--muted);border-top:0}
   }
   fetch("/place-photos/alternates.json").then(function(r){ if(!r.ok) throw Error("photo credits unavailable"); return r.json(); })
     .then(function(all){ alternateCredits=all; render(); })
+    .catch(function(e){ console.error(e); });
+  Promise.all(["canyon-photos","outdoor-photos","city-photos"].map(function(group){
+    return fetch("/place-photos/"+group+".json").then(function(r){
+      if(!r.ok) throw Error("extra photo credits unavailable: "+group);
+      return r.json();
+    });
+  })).then(function(groups){ extraCredits=Object.assign({}, groups[0], groups[1], groups[2]); render(); })
     .catch(function(e){ console.error(e); });
   setSync("Connecting to the shared list…");
   pullVotes(); pullPhotos();
@@ -502,19 +509,21 @@ th{font-weight:700;color:var(--muted);border-top:0}
       var faces = PEOPLE.map(function(person){ var v = votes[person]&&votes[person][p[0]]; if(!v) return ""; return '<span class="face '+(v==="like"?"l":"s")+'" title="'+person+'">'+person.slice(0,2)+'</span>'; }).join("");
       var ph = photos[p[0]]||[];
       var defaultPhoto = window.PLACE_PHOTOS && window.PLACE_PHOTOS[p[0]];
-      var choices = ph.slice().reverse();
-      if(defaultPhoto) {
-        choices.push("/place-photos/"+p[0]+".jpg");
-        if(alternateCredits[p[0]]) choices.push("/place-photos/"+p[0]+"-2.jpg");
-      }
+      var defaults = [];
+      if(defaultPhoto) defaults.push({url:"/place-photos/"+p[0]+".jpg", credit:defaultPhoto});
+      if(alternateCredits[p[0]]) defaults.push({url:"/place-photos/"+p[0]+"-2.jpg", credit:alternateCredits[p[0]]});
+      (extraCredits[p[0]]||[]).forEach(function(credit, n){
+        defaults.push({url:"/place-photos/"+p[0]+"-"+(n+3)+".jpg", credit:credit});
+      });
+      var choices = ph.slice().reverse().concat(defaults.map(function(item){ return item.url; }));
       var choice = photoChoice[p[0]] || 0;
       if(choice >= choices.length) choice = 0;
       photoChoice[p[0]] = choice;
       var artHtml = choices.length ? '<img class="photo" src="'+choices[choice]+'" alt="'+p[1]+'">' :
         art(p[4], i)+'<span class="glyph">'+p[3]+'</span>';
-      var selectedCredit = choice===ph.length ? defaultPhoto : choice===ph.length+1 ? alternateCredits[p[0]] : null;
+      var selectedCredit = choice>=ph.length && defaults[choice-ph.length] ? defaults[choice-ph.length].credit : null;
       var credit = selectedCredit ? '<div class="credit"><a href="'+selectedCredit.source+'" target="_blank" rel="noopener">'+
-        (defaultPhoto.general?'General photo: ':'Photo: ')+selectedCredit.author+', '+selectedCredit.license+'</a></div>' : '';
+        (selectedCredit.general?'General photo: ':'Photo: ')+selectedCredit.author+', '+selectedCredit.license+'</a></div>' : '';
       var nextPhoto = choices.length>1 ? '<button class="photo-next" type="button">Next photo</button>' : '';
       var strip = choices.length>1 ? '<div class="strip" aria-label="Photos for '+p[1]+'">'+choices.map(function(u, n){
         return '<button class="thumb" type="button" aria-label="Show photo '+(n+1)+'" aria-pressed="'+(n===choice)+'"><img src="'+u+'" alt=""></button>';
