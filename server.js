@@ -11,8 +11,9 @@ app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] })
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required for persistent trip storage");
 const db = new Pool({ connectionString: process.env.DATABASE_URL });
-const storage = new Client();
 const PEOPLE = ["David", "Lauren", "Stephanie"];
+
+function storage() { return new Client(); }
 
 function stored(result) {
   if (!result.ok) throw new Error(String(result.error));
@@ -54,7 +55,7 @@ app.get("/api/photo/:key", async (req, res) => {
     const key = req.params.key;
     const row = await db.query("SELECT 1 FROM trip_photos WHERE object_key = $1", [key]);
     if (!row.rowCount) return res.sendStatus(404);
-    const b = stored(await storage.downloadAsBytes(key));
+    const b = stored(await storage().downloadAsBytes(key));
     res.set("Content-Type", "image/jpeg").set("Cache-Control", "public, max-age=86400").send(b);
   } catch (e) { res.sendStatus(500); }
 });
@@ -65,7 +66,7 @@ app.post("/api/photos/:place", async (req, res) => {
   if (dataUrl.length > 1.5e6) return res.status(413).json({ error: "photo too big" });
   const key = "family-photos/" + place + "/" + Date.now() + "-" + randomUUID() + ".jpg";
   try {
-    stored(await storage.uploadFromBytes(key, Buffer.from(dataUrl.split(",")[1], "base64")));
+    stored(await storage().uploadFromBytes(key, Buffer.from(dataUrl.split(",")[1], "base64")));
     await db.query("INSERT INTO trip_photos (object_key, place) VALUES ($1, $2)", [key, place]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: "save failed" }); }
@@ -74,7 +75,7 @@ app.post("/api/photos/:place", async (req, res) => {
 app.get("/api/health", async (req, res) => {
   try {
     await db.query("SELECT 1");
-    stored(await storage.list({ prefix: "family-photos/", maxResults: 1 }));
+    stored(await storage().list({ prefix: "family-photos/", maxResults: 1 }));
     res.json({ ok: true, storage: "replit-db", version: "1.3.0" });
   } catch (e) { res.status(503).json({ ok: false, error: "persistent storage unavailable" }); }
 });

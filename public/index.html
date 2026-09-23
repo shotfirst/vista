@@ -136,6 +136,8 @@ th{font-weight:700;color:var(--muted);border-top:0}
 .rowbtns{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);flex-wrap:wrap}
 .learn{font-weight:700;font-size:1rem}
 .art .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.credit{padding:5px var(--s4);font-size:.73rem;color:var(--muted);line-height:1.35}
+.credit a{color:inherit}
 .art .count{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.8rem;font-weight:700;padding:5px 10px;border-radius:999px}
 .strip{display:flex;gap:6px;overflow-x:auto;padding:8px var(--s4) 0;scrollbar-width:none}
 .strip img{height:64px;width:86px;object-fit:cover;border-radius:8px;flex:0 0 auto}
@@ -225,6 +227,7 @@ th{font-weight:700;color:var(--muted);border-top:0}
 
 <div class="bar"><span><span class="small">Your trip</span><br><b id="barTotal"></b></span><a href="#cost">See the breakdown</a></div>
 
+<script src="/place-photos/credits.js"></script>
 <script>
 (function(){
   var FX = 1.39;
@@ -490,8 +493,18 @@ th{font-weight:700;color:var(--muted);border-top:0}
       var c = document.createElement("article"); c.className="card"+(my==="like"?" liked":my==="skip"?" skipped":"");
       var onlyLong = p[14]==="" ? '<span class="tag">10 night trip only</span>' : '';
       var faces = PEOPLE.map(function(person){ var v = votes[person]&&votes[person][p[0]]; if(!v) return ""; return '<span class="face '+(v==="like"?"l":"s")+'" title="'+person+'">'+person.slice(0,2)+'</span>'; }).join("");
-      var ph = photos[p[0]]||[]; var artHtml = ph.length ? '<img class="photo" src="'+ph[ph.length-1]+'" alt="">' : art(p[4], i)+'<span class="glyph">'+p[3]+'</span>';
-      c.innerHTML = '<div class="art">'+artHtml+onlyLong+(ph.length>1?'<span class="count">'+ph.length+' photos</span>':'')+'</div>'+
+      var ph = photos[p[0]]||[];
+      var defaultPhoto = window.PLACE_PHOTOS && window.PLACE_PHOTOS[p[0]];
+      var artHtml = ph.length ? '<img class="photo" src="'+ph[ph.length-1]+'" alt="">' :
+        defaultPhoto ? '<img class="photo" src="/place-photos/'+p[0]+'.jpg" alt="'+p[1]+'">' :
+        art(p[4], i)+'<span class="glyph">'+p[3]+'</span>';
+      var licenseUrl = defaultPhoto && (defaultPhoto.license==="Public domain" ? defaultPhoto.source :
+        defaultPhoto.license==="CC0" ? "https://creativecommons.org/publicdomain/zero/1.0/" :
+        "https://creativecommons.org/licenses/"+defaultPhoto.license.toLowerCase().replace(/^cc /,"").replace(/ uk$/,"/uk").replace(/ /g,"/")+"/");
+      var credit = defaultPhoto && !ph.length ? '<div class="credit">'+(defaultPhoto.general?'General photo · ':'')+
+        '<a href="'+defaultPhoto.source+'" target="_blank" rel="noopener">Photo: '+defaultPhoto.author+'</a> · '+
+        '<a href="'+licenseUrl+'" target="_blank" rel="noopener">'+defaultPhoto.license+'</a> · resized</div>' : '';
+      c.innerHTML = '<div class="art">'+artHtml+onlyLong+(ph.length>1?'<span class="count">'+ph.length+' photos</span>':'')+'</div>'+credit+
         (ph.length>1?'<div class="strip">'+ph.map(function(u){return '<img src="'+u+'" alt="">';}).join("")+'</div>':'')+
         '<div class="body"><h3>'+p[1]+'</h3>'+
         '<div class="facts"><span>🚗 <b>'+p[6]+'</b></span><span>🚶 <b>'+p[7]+'</b></span><span>👨‍👩‍👧‍👦 <b>'+p[8]+'</b></span></div>'+
