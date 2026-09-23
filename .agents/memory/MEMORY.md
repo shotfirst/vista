@@ -1,2 +1,3 @@
 - [App Storage bucket discovery](app-storage-bucket-discovery.md) — a created bucket may not resolve through the SDK's default lookup; verify storage after restart.
 - [Headless Chromium CDP handshake](headless-chromium-cdp.md) — the local debugging socket may use a nonstandard success reason phrase; accept the 101 status code.
+- [Headless Chromium hover tests](headless-chromium-hover.md) — mouse events can fire while hover/pointer media queries still report false in headless mode.

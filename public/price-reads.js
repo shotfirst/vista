@@ -1,4 +1,4 @@
-// Dated quotes supplied for Vista 1.4. These are snapshots, not a live booking API.
+// Dated quotes supplied for Vista. These are snapshots, not a live booking API.
 (function(){
   "use strict";
   var flightRead = "23 Sep 2026 at 5:24 PM Eastern";
@@ -87,30 +87,81 @@
     parent.appendChild(child);
     return child;
   }
+  function priceCard(q, group, id, originalLabel){
+    var item = document.createElement("article");
+    item.className = "price-item";
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "price-toggle";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", id);
+    line(button, "span", "price-name", q.name);
+    line(button, "span", "price-amount", q.amount);
+    line(button, "span", "price-source", "Source: "+q.source);
+    line(button, "span", "price-status", q.status===two ? "Confirmed by two sources" : "One source");
+    item.appendChild(button);
+
+    var peek = document.createElement("div");
+    peek.className = "price-peek";
+    peek.setAttribute("aria-hidden", "true");
+    line(peek, "span", "", "Source: "+q.source);
+    line(peek, "span", "", " · Price read on "+q.read);
+    item.appendChild(peek);
+
+    var detail = document.createElement("div");
+    detail.id = id;
+    detail.className = "price-details";
+    detail.hidden = true;
+    line(detail, "p", "price-time", "Price read on "+q.read);
+    line(detail, "p", "price-detail", "Price context: "+group.title);
+    if(q.detail) line(detail, "p", "price-detail", q.detail);
+    if(group.note) line(detail, "p", "price-detail", group.note);
+    line(detail, "p", "price-original-status", q.status);
+    if(originalLabel) line(detail, "span", "pill src", originalLabel);
+    if(q.own){
+      var own = document.createElement("div");
+      line(own, "span", "price-status", "Your estimate");
+      line(own, "p", "price-detail", q.own);
+      detail.appendChild(own);
+    }
+    line(detail, "p", "price-earlier", "earlier estimate: "+q.earlier);
+    item.appendChild(detail);
+    button.addEventListener("click", function(){
+      var open = button.getAttribute("aria-expanded") !== "true";
+      button.setAttribute("aria-expanded", String(open));
+      detail.hidden = !open;
+      item.classList.toggle("is-open", open);
+    });
+    button.addEventListener("keydown", function(event){
+      if(event.key==="Enter"){
+        event.preventDefault();
+        if(!event.repeat) button.click();
+      }
+    });
+    item.addEventListener("pointerenter", function(event){
+      if(event.pointerType==="mouse" && window.matchMedia("(min-width:640px)").matches){
+        item.classList.add("is-peeking");
+      }
+    });
+    item.addEventListener("pointerleave", function(){ item.classList.remove("is-peeking"); });
+    return item;
+  }
+  window.VISTA_PRICE_CARD = priceCard;
+  window.VISTA_ATTRACTION_GROUP = groups[5];
   var root = document.getElementById("priceReads");
   if(!root) return;
   root.textContent = "";
-  groups.forEach(function(group){
+  groups.forEach(function(group, groupIndex){
     var section = document.createElement("div");
     section.className = "price-group";
     line(section, "h3", "", group.title);
-    if(group.note) line(section, "p", "small", group.note);
     var grid = document.createElement("div");
     grid.className = "price-grid";
-    group.quotes.forEach(function(q){
-      var item = document.createElement("article");
-      item.className = "price-item";
-      line(item, "h4", "", q.name);
-      line(item, "p", "price-amount", q.amount);
-      line(item, "p", "price-source", "Source: "+q.source);
-      line(item, "p", "price-time", "Price read on "+q.read);
-      line(item, "span", "price-status", q.status);
-      if(q.detail) line(item, "p", "price-detail", q.detail);
-      if(q.own) line(item, "p", "price-detail", q.own);
-      line(item, "p", "price-earlier", "earlier estimate: "+q.earlier);
-      grid.appendChild(item);
+    group.quotes.forEach(function(q, quoteIndex){
+      grid.appendChild(priceCard(q, group, "price-details-"+groupIndex+"-"+quoteIndex));
     });
     section.appendChild(grid);
+    if(group.note) line(section, "p", "small", group.note);
     root.appendChild(section);
   });
 })();

@@ -78,7 +78,7 @@ app.get("/api/health", async (req, res) => {
   try {
     await db.query("SELECT 1");
     stored(await storage().list({ prefix: "family-photos/", maxResults: 1 }));
-    res.json({ ok: true, storage: "replit-db", version: "1.4.0" });
+    res.json({ ok: true, storage: "replit-db", version: "1.5.0" });
   } catch (e) { res.status(503).json({ ok: false, error: "persistent storage unavailable" }); }
 });
 const port = process.env.PORT || 3000;

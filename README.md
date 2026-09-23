@@ -2,6 +2,11 @@
 
 One page the whole family opens on a phone. Everyone taps hearts on places; every phone shows the same hearts. Anyone can add a photo to a place.
 
+## Version 1.5 (23 September 2026)
+- Restyled the page in Desert Warm using shared colours, Fraunces headings, Hanken Grotesk body text, rounded cards and pill controls; documented the system in DESIGN.md.
+- Dated price cards now share one accessible expandable template. Their price and source remain visible; details open on click or keyboard, with a source/read-time peek on desktop hover.
+- Kept the trip controls, totals, places, photos, shared picks, prior research notes and all version 1.4 price data.
+
 ## Version 1.4 (23 September 2026)
 - Added dated price reads for flights, Las Vegas and Tusayan stays, minivans and attractions, each with its source, Eastern read time, confidence label and earlier estimate.
 - Added the 1.4 "What the refute pass changed" findings and "Still to check" list; kept the earlier refute notes and research sources available for reference.
